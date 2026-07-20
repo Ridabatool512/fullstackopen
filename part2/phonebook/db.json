@@ -1,0 +1,24 @@
+{
+  "persons": [
+    {
+      "id": "1",
+      "name": "Ali Khan",
+      "number": "0301-1234567"
+    },
+    {
+      "id": "2",
+      "name": "Ayesha Ahmed",
+      "number": "0321-9876543"
+    },
+    {
+      "id": "3",
+      "name": "Muhammad Hamza",
+      "number": "0333-4567890"
+    },
+    {
+      "id": "4",
+      "name": "Fatima Noor",
+      "number": "0345-6789012"
+    }
+  ]
+}

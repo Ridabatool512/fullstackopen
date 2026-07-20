@@ -1,43 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-  { id: 1, name: 'Ali Khan', number: '0301-1234567' },
-  { id: 2, name: 'Ayesha Ahmed', number: '0321-9876543' },
-  { id: 3, name: 'Muhammad Hamza', number: '0333-4567890' },
-  { id: 4, name: 'Fatima Noor', number: '0345-6789012' }
-
-  ])
-
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, [])
+
   const addPerson = (event) => {
-  event.preventDefault()
+    event.preventDefault()
 
-  const exists = persons.some(
-    person => person.name.toLowerCase() === newName.toLowerCase()
-  )
+    const exists = persons.some(
+      person => person.name.toLowerCase() === newName.toLowerCase()
+    )
 
-  if (exists) {
-    alert(`${newName} is already added to the phonebook`)
-    return
+    if (exists) {
+      alert(`${newName} is already added to the phonebook`)
+      return
+    }
+
+    const personObject = {
+      id: persons.length + 1,
+      name: newName,
+      number: newNumber
+    }
+
+    setPersons(persons.concat(personObject))
+    setNewName('')
+    setNewNumber('')
   }
 
-  const personObject = {
-    id: persons.length + 1,
-    name: newName,
-    number: newNumber
-  }
-
-  setPersons(persons.concat(personObject))
-  setNewName('')
-  setNewNumber('')
-}
   const personsToShow =
     filter === ''
       ? persons
