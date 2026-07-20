@@ -19,6 +19,12 @@
       "id": "4",
       "name": "Fatima Noor",
       "number": "0345-6789012"
+    },
+    {
+      "name": "rida",
+      "number": "0311545782",
+      "id": "XwtNk6AVfug"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
