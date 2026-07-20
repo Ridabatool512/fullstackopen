@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
+import Notification from './Notification'
 import personService from './services/persons'
 
 const App = () => {
@@ -9,6 +10,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState('success')
 
   useEffect(() => {
     personService
@@ -44,8 +47,30 @@ const App = () => {
                 person.id !== existingPerson.id ? person : response.data
               )
             )
+
+            setMessage(`Updated ${response.data.name}`)
+            setMessageType('success')
+
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+
             setNewName('')
             setNewNumber('')
+          })
+          .catch(() => {
+            setMessage(
+              `Information of ${existingPerson.name} has already been removed from server`
+            )
+            setMessageType('error')
+
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+
+            setPersons(
+              persons.filter(person => person.id !== existingPerson.id)
+            )
           })
       }
 
@@ -61,13 +86,21 @@ const App = () => {
       .create(personObject)
       .then(response => {
         setPersons(persons.concat(response.data))
+
+        setMessage(`Added ${response.data.name}`)
+        setMessageType('success')
+
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+
         setNewName('')
         setNewNumber('')
       })
   }
 
   const deletePerson = (id) => {
-    const person = persons.find(p => p.id === id)
+    const person = persons.find(person => person.id === id)
 
     if (window.confirm(`Delete ${person.name}?`)) {
       personService
@@ -88,6 +121,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification
+        message={message}
+        type={messageType}
+      />
 
       <Filter
         filter={filter}
