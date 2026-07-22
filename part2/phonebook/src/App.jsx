@@ -44,7 +44,9 @@ const App = () => {
           .then(response => {
             setPersons(
               persons.map(person =>
-                person.id !== existingPerson.id ? person : response.data
+                person.id !== existingPerson.id
+                  ? person
+                  : response.data
               )
             )
 
@@ -97,7 +99,16 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(error => {
+        setMessage(error.response.data.error)
+        setMessageType('error')
+
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+      })
   }
+
 
   const deletePerson = (id) => {
     const person = persons.find(person => person.id === id)
@@ -106,17 +117,23 @@ const App = () => {
       personService
         .remove(id)
         .then(() => {
-          setPersons(persons.filter(person => person.id !== id))
+          setPersons(
+            persons.filter(person => person.id !== id)
+          )
         })
     }
   }
+
 
   const personsToShow =
     filter === ''
       ? persons
       : persons.filter(person =>
-          person.name.toLowerCase().includes(filter.toLowerCase())
+          person.name
+            .toLowerCase()
+            .includes(filter.toLowerCase())
         )
+
 
   return (
     <div>

@@ -4,16 +4,20 @@ const Notification = ({ message, type }) => {
   }
 
   const style = {
-    color: type === 'success' ? 'green' : 'red',
+    color: type === 'error' ? 'red' : 'green',
     background: 'lightgrey',
     fontSize: '20px',
-    border: `2px solid ${type === 'success' ? 'green' : 'red'}`,
+    border: `2px solid ${type === 'error' ? 'red' : 'green'}`,
     borderRadius: '5px',
     padding: '10px',
     marginBottom: '10px'
   }
 
-  return <div style={style}>{message}</div>
+  return (
+    <div style={style}>
+      {message}
+    </div>
+  )
 }
 
 export default Notification
