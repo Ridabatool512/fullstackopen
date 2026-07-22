@@ -1,16 +1,22 @@
 import axios from 'axios'
 
-const baseUrl = 'http://localhost:3001/persons'
+const baseUrl = 'http://localhost:3001/api/persons'
 
-const getAll = () => axios.get(baseUrl)
+const getAll = () => {
+  return axios.get(baseUrl)
+}
 
-const create = (newPerson) => axios.post(baseUrl, newPerson)
+const create = newObject => {
+  return axios.post(baseUrl, newObject)
+}
 
-const update = (id, changedPerson) =>
-  axios.put(`${baseUrl}/${id}`, changedPerson)
+const update = (id, newObject) => {
+  return axios.put(`${baseUrl}/${id}`, newObject)
+}
 
-const remove = (id) =>
-  axios.delete(`${baseUrl}/${id}`)
+const remove = id => {
+  return axios.delete(`${baseUrl}/${id}`)
+}
 
 export default {
   getAll,
