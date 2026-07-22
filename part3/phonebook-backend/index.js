@@ -64,7 +64,24 @@ app.post('/api/persons', (req, res, next) => {
     })
     .catch(error => next(error))
 })
+app.put('/api/persons/:id', (req, res, next) => {
+  const { name, number } = req.body
 
+  const person = {
+    name,
+    number
+  }
+
+  Person.findByIdAndUpdate(
+    req.params.id,
+    person,
+    { new: true, runValidators: true, context: 'query' }
+  )
+    .then(updatedPerson => {
+      res.json(updatedPerson)
+    })
+    .catch(error => next(error))
+})
 // Delete person
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
