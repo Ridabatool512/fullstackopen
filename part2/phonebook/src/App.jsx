@@ -14,13 +14,13 @@ const App = () => {
   const [messageType, setMessageType] = useState('success')
 
   useEffect(() => {
-    personService
-      .getAll()
-      .then(response => {
-        setPersons(response.data)
-      })
-  }, [])
-
+  personService
+    .getAll()
+    .then(response => {
+      console.log("API RESPONSE:", response.data)
+      setPersons(response.data)
+    })
+}, [])
   const addPerson = (event) => {
     event.preventDefault()
 
