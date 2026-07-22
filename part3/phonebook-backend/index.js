@@ -1,41 +1,21 @@
+require('dotenv').config()
 const morgan = require('morgan')
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const Person = require('./models/person')
+
 app.use(cors())
 app.use(express.json())
 app.use(express.static('dist'))
 
-morgan.token('body', (req) => {
-  return JSON.stringify(req.body)
-})
+morgan.token('body', (req) => JSON.stringify(req.body))
+
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
 )
-console.log('Starting server...')
 
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456"
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523"
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345"
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122"
-  }
-]
+console.log('Starting server...')
 
 // Home route
 app.get('/', (req, res) => {
@@ -44,35 +24,27 @@ app.get('/', (req, res) => {
 
 // Get all persons
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
-})
-
-// Get single person
-app.get('/api/persons/:id', (req, res) => {
-  const id = req.params.id
-
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
-    res.json(person)
-  } else {
-    res.status(404).json({
-      error: 'person not found'
+  Person.find({})
+    .then(persons => {
+      res.json(persons)
     })
-  }
 })
 
-// Delete person
-app.delete('/api/persons/:id', (req, res) => {
-  const id = req.params.id
-
-  persons = persons.filter(person => person.id !== id)
-
-  res.status(204).end()
+// Get one person
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 // Add person
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
   if (!body.name || !body.number) {
@@ -81,41 +53,63 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  const personExists = persons.some(
-    person => person.name === body.name
-  )
-
-  if (personExists) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    })
-  }
-
-  const newPerson = {
-    id: String(Math.floor(Math.random() * 1000000)),
+  const person = new Person({
     name: body.name,
     number: body.number
-  }
+  })
 
-  persons = persons.concat(newPerson)
+  person.save()
+    .then(savedPerson => {
+      res.json(savedPerson)
+    })
+    .catch(error => next(error))
+})
 
-  res.json(newPerson)
+// Delete person
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // Info page
 app.get('/info', (req, res) => {
-  const date = new Date()
+  Person.find({})
+    .then(persons => {
+      const date = new Date()
 
-  res.send(`
-    <h1>Phonebook Info</h1>
-    <p>Phonebook has info for ${persons.length} people</p>
-    <p>${date}</p>
-  `)
+      res.send(`
+        <h1>Phonebook Info</h1>
+        <p>Phonebook has info for ${persons.length} people</p>
+        <p>${date}</p>
+      `)
+    })
 })
 
+// Unknown endpoint middleware
+const unknownEndpoint = (req, res) => {
+  res.status(404).json({
+    error: 'unknown endpoint'
+  })
+}
 
-// Error handling middleware (must be before unknown endpoint)
+// Error handling middleware
 const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return res.status(400).json({
+      error: 'malformatted id'
+    })
+  }
+
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      error: error.message
+    })
+  }
 
   if (error.name === 'SyntaxError') {
     return res.status(400).json({
@@ -126,20 +120,10 @@ const errorHandler = (error, req, res, next) => {
   next(error)
 }
 
+app.use(unknownEndpoint)
 app.use(errorHandler)
 
-
-// Unknown endpoint middleware (must be last)
-const unknownEndpoint = (req, res) => {
-  res.status(404).json({
-    error: 'unknown endpoint'
-  })
-}
-
-app.use(unknownEndpoint)
-
-
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
